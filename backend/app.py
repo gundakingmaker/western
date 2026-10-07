@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from pymongo import MongoClient
+from pymongo import MongoClient\nfrom sqlalchemy import or_
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -47,7 +47,7 @@ def create_app():
         q=request.args.get("q","").strip()
         state=request.args.get("state","").strip()
         query=Place.query
-        if q: query=query.filter(db.or_(Place.name.ilike(f"%{q}%"),Place.description.ilike(f"%{q}%")))
+        if q: query=query.filter(or_(Place.name.ilike(f"%{q}%"),Place.description.ilike(f"%{q}%")))
         if state: query=query.filter_by(state=state)
         return jsonify([p.to_dict() for p in query.order_by(Place.featured.desc(),Place.name).all()])
 
@@ -78,8 +78,8 @@ def create_app():
         term=f"%{q}%"
         return jsonify({
             "destinations":[p.to_dict() for p in Place.query.filter(db.or_(Place.name.ilike(term),Place.state.ilike(term))).limit(12).all()],
-            "packages":[p.to_dict() for p in Package.query.filter(db.or_(Package.name.ilike(term),Package.state.ilike(term))).limit(12).all()],
-            "stays":[h.to_dict() for h in Hotel.query.filter(db.or_(Hotel.name.ilike(term),Hotel.state.ilike(term))).limit(12).all()]
+            "packages":[p.to_dict() for p in Package.query.filter(or_(Package.name.ilike(term),Package.state.ilike(term))).limit(12).all()],
+            "stays":[h.to_dict() for h in Hotel.query.filter(or_(Hotel.name.ilike(term),Hotel.state.ilike(term))).limit(12).all()]
         })
 
     @app.post("/api/v1/planner/recommend")
