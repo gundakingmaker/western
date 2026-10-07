@@ -29,9 +29,9 @@ hotels=[
 ]
 with app.app_context():
     db.drop_all();db.create_all()
-    for name,tag,pic in states: db.session.add(State(str(uuid.uuid4()),name,tag,IMG.format(pic)))
-    for i,(name,state,typ,meta,pic) in enumerate(places): db.session.add(Place(str(uuid.uuid4()),name,state,typ,meta,name+" — curated GHATVERSE destination",IMG.format(pic),True))
-    for name,state,days,price,tag,pic in packages: db.session.add(Package(str(uuid.uuid4()),name,state,days,price,tag,IMG.format(pic),True))
-    for name,state,location,price,rating,pic in hotels: db.session.add(Hotel(str(uuid.uuid4()),name,state,location,price,rating,IMG.format(pic),True))
+    for name,tag,pic in states: db.session.add(State(id=str(uuid.uuid4()),name=name,tag=tag,image_url=IMG.format(pic)))
+    for i,(name,state,typ,meta,pic) in enumerate(places): db.session.add(Place(id=str(uuid.uuid4()),name=name,state=state,type=typ,meta=meta,description=name+" — curated GHATVERSE destination",image_url=IMG.format(pic),featured=True))
+    for name,state,days,price,tag,pic in packages: db.session.add(Package(id=str(uuid.uuid4()),name=name,state=state,days=days,price=price,tag=tag,image_url=IMG.format(pic),featured=True))
+    for name,state,location,price,rating,pic in hotels: db.session.add(Hotel(id=str(uuid.uuid4()),name=name,state=state,location=location,price_per_night=price,rating=rating,image_url=IMG.format(pic),featured=True))
     db.session.commit()
     print("GHATVERSE PostgreSQL seed complete")
