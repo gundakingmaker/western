@@ -1,5 +1,6 @@
 import React,{useEffect,useMemo,useState}from"react";
-import{Compass,Map,CalendarDays,Hotel,PlayCircle,Leaf,Heart,Search,ArrowRight,Menu,X,MapPin,Star,Users,Mountain,ChevronRight}from"lucide-react";\nimport{api}from"./api";
+import{Compass,Map,CalendarDays,Hotel,PlayCircle,Leaf,Heart,Search,ArrowRight,Menu,X,MapPin,Star,Users,Mountain,ChevronRight}from"lucide-react";
+import{api}from"./api";
 
 const img=(id,w=900)=>`https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=85`;
 const states=[
@@ -29,7 +30,15 @@ const reels=[
 
 function App(){
  const[page,setPage]=useState("home"),[query,setQuery]=useState(""),[menu,setMenu]=useState(false),[liked,setLiked]=useState([]);
- const filtered=useMemo(()=>destinations.filter(d=>(d.name+d.state+d.type).toLowerCase().includes(query.toLowerCase())),[query]);
+ const[remote,setRemote]=useState({states:[],destinations:[],packages:[],stays:[],reels:[]});
+ const[apiStatus,setApiStatus]=useState("connecting");
+ useEffect(()=>{let live=true;Promise.all([api.states(),api.destinations(),api.packages(),api.stays(),api.reels()]).then(([s,d,p,h,r])=>{if(!live)return;setRemote({states:s||[],destinations:d||[],packages:p||[],stays:h||[],reels:r||[]});setApiStatus("online")}).catch(()=>{if(live)setApiStatus("offline")});return()=>{live=false}},[]);
+ const stateData=remote.states.length?remote.states:states;
+ const destinationData=remote.destinations.length?remote.destinations:destinations;
+ const packageData=remote.packages.length?remote.packages:packages;
+ const stayData=remote.stays.length?remote.stays:null;
+ const reelData=remote.reels.length?remote.reels:reels;
+ const filtered=useMemo(()=>destinationData.filter(d=>(d.name+d.state+d.type).toLowerCase().includes(query.toLowerCase())),[destinationData,query]);
  const go=p=>{setPage(p);setMenu(false);window.scrollTo({top:0,behavior:"smooth"})};
  return <div className="app">
   <header className="nav">
