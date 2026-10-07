@@ -77,7 +77,7 @@ def create_app():
         if not q: return jsonify({"destinations":[],"packages":[],"stays":[]})
         term=f"%{q}%"
         return jsonify({
-            "destinations":[p.to_dict() for p in Place.query.filter(db.or_(Place.name.ilike(term),Place.state.ilike(term))).limit(12).all()],
+            "destinations":[p.to_dict() for p in Place.query.filter(or_(Place.name.ilike(term),Place.state.ilike(term))).limit(12).all()],
             "packages":[p.to_dict() for p in Package.query.filter(or_(Package.name.ilike(term),Package.state.ilike(term))).limit(12).all()],
             "stays":[h.to_dict() for h in Hotel.query.filter(or_(Hotel.name.ilike(term),Hotel.state.ilike(term))).limit(12).all()]
         })
