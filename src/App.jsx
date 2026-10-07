@@ -1,5 +1,5 @@
-import React,{useMemo,useState}from"react";
-import{Compass,Map,CalendarDays,Hotel,PlayCircle,Leaf,Heart,Search,ArrowRight,Menu,X,MapPin,Star,Users,Mountain,ChevronRight}from"lucide-react";
+import React,{useEffect,useMemo,useState}from"react";
+import{Compass,Map,CalendarDays,Hotel,PlayCircle,Leaf,Heart,Search,ArrowRight,Menu,X,MapPin,Star,Users,Mountain,ChevronRight}from"lucide-react";\nimport{api}from"./api";
 
 const img=(id,w=900)=>`https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=85`;
 const states=[
@@ -35,21 +35,21 @@ function App(){
   <header className="nav">
    <button className="brand" onClick={()=>go("home")}><span className="brandMark">⌁</span><span>GHAT<span>VERSE</span></span></button>
    <nav className={menu?"navLinks open":"navLinks"}>{["home","destinations","packages","stays","reels","planner"].map(p=><button key={p} className={page===p?"active":""} onClick={()=>go(p)}>{p==="home"?"Home":p[0].toUpperCase()+p.slice(1)}</button>)}</nav>
-   <div className="navActions"><button className="iconBtn"><Search size={19}/></button><button className="menuBtn" onClick={()=>setMenu(!menu)}>{menu?<X/>:<Menu/>}</button><button className="cta small" onClick={()=>go("planner")}>Plan a Trip</button></div>
+   <div className="navActions"><span className={"apiDot "+apiStatus} title={"API: "+apiStatus}></span><button className="iconBtn"><Search size={19}/></button><button className="menuBtn" onClick={()=>setMenu(!menu)}>{menu?<X/>:<Menu/>}</button><button className="cta small" onClick={()=>go("planner")}>Plan a Trip</button></div>
   </header>
 
-  {page==="home"&&<Home go={go} query={query} setQuery={setQuery} filtered={filtered} liked={liked} setLiked={setLiked}/>}
+  {page==="home"&&<Home go={go} query={query} setQuery={setQuery} filtered={filtered} states={stateData} packages={packageData} liked={liked} setLiked={setLiked}/>}
   {page==="destinations"&&<Listing title="Discover the Western Ghats" sub="Hidden places, iconic landscapes and local experiences." items={filtered} go={go}/>}
-  {page==="packages"&&<PackagePage go={go}/>}
-  {page==="stays"&&<StayPage/>}
-  {page==="reels"&&<ReelsPage liked={liked} setLiked={setLiked}/>}
+  {page==="packages"&&<PackagePage go={go} items={packageData}/>}
+  {page==="stays"&&<StayPage items={stayData}/>}
+  {page==="reels"&&<ReelsPage items={reelData} liked={liked} setLiked={setLiked}/>}
   {page==="planner"&&<Planner/>}
 
   <footer><div><button className="brand footerBrand" onClick={()=>go("home")}><span className="brandMark">⌁</span><span>GHAT<span>VERSE</span></span></button><p>Not just a trip. It's a Ghatverse experience.</p></div><div><h4>Explore</h4><button onClick={()=>go("destinations")}>Destinations</button><button onClick={()=>go("packages")}>Packages</button><button onClick={()=>go("reels")}>Reels</button></div><div><h4>Travel</h4><button onClick={()=>go("planner")}>Trip Planner</button><button>Responsible Travel</button><button>Local Experiences</button></div><div><h4>Project</h4><button>About GHATVERSE</button><button>Contact</button><button>Privacy</button></div></footer>
  </div>
 }
 
-function Home({go,query,setQuery,filtered,liked,setLiked}){
+function Home({go,query,setQuery,filtered,states,packages,liked,setLiked}){
  return <main>
   <section className="hero"><div className="heroOverlay"/><div className="heroContent">
    <div className="eyebrow"><Leaf size={15}/> EXPLORE · STAY · EXPERIENCE</div>
@@ -75,11 +75,11 @@ function Home({go,query,setQuery,filtered,liked,setLiked}){
 
 function Listing({title,sub,items,go}){return <main className="page"><div className="pageHero"><small>GHATVERSE DISCOVERY</small><h1>{title}</h1><p>{sub}</p></div><section className="section"><div className="filterBar"><button className="filter active">All destinations</button><button className="filter">Karnataka</button><button className="filter">Kerala</button><button className="filter">Maharashtra</button><button className="filter">Tamil Nadu</button></div><div className="destGrid large">{items.map(d=><article className="destCard" key={d.name} onClick={()=>go("planner")}><img src={d.img}/><div className="cardShade"/><div className="cardInfo"><span>{d.state}</span><h3>{d.name}</h3><p>{d.type} · {d.meta}</p></div></article>)}</div></section></main>}
 
-function PackagePage({go}){return <main className="page"><div className="pageHero"><small>CURATED TRIPS</small><h1>Packages for every kind of traveller.</h1><p>Budget, standard and premium journeys across the Ghats.</p></div><section className="section"><div className="packageGrid">{[...packages,...packages].map((p,i)=><article className="packageCard" key={i}><img src={p.img}/><div className="packageBody"><span className="pill">{p.tag}</span><h3>{p.name}</h3><p>{p.days} · Stay · Food · Local experience</p><div><strong>{p.price}</strong><button className="miniCta" onClick={()=>go("planner")}>Plan this</button></div></div></article>)}</div></section></main>}
+function PackagePage({go,items}){return <main className="page"><div className="pageHero"><small>CURATED TRIPS</small><h1>Packages for every kind of traveller.</h1><p>Budget, standard and premium journeys across the Ghats.</p></div><section className="section"><div className="packageGrid">{[...items,...items].map((p,i)=><article className="packageCard" key={i}><img src={p.img}/><div className="packageBody"><span className="pill">{p.tag}</span><h3>{p.name}</h3><p>{p.days} · Stay · Food · Local experience</p><div><strong>{p.price}</strong><button className="miniCta" onClick={()=>go("planner")}>Plan this</button></div></div></article>)}</div></section></main>}
 
-function StayPage(){const stays=[["The Serai","Munnar","₹3,500 / night"],["Green Woods Retreat","Coorg","₹4,200 / night"],["Tea Valley Resort","Munnar","₹5,800 / night"],["Forest Edge Homestay","Agumbe","₹2,100 / night"]];return <main className="page"><div className="pageHero"><small>STAY IN THE GHATS</small><h1>Stays from homestays to retreats.</h1><p>Find a place that matches your route, budget and travel style.</p></div><section className="section"><div className="stayGrid">{stays.map(([n,l,p])=><article className="stayCard" key={n}><img src={img("photo-1505693416388-ac5ce068fe85")}/><div><div className="rating"><Star fill="currentColor" size={14}/> 4.8</div><h3>{n}</h3><p><MapPin size={14}/> {l}</p><strong>{p}</strong></div></article>)}</div></section></main>}
+function StayPage({items}){const stays=items||[["The Serai","Munnar","₹3,500 / night"],["Green Woods Retreat","Coorg","₹4,200 / night"],["Tea Valley Resort","Munnar","₹5,800 / night"],["Forest Edge Homestay","Agumbe","₹2,100 / night"]].map(([name,location,price])=>({name,location,price,rating:4.8,img:img("photo-1505693416388-ac5ce068fe85")}));return <main className="page"><div className="pageHero"><small>STAY IN THE GHATS</small><h1>Stays from homestays to retreats.</h1><p>Find a place that matches your route, budget and travel style.</p></div><section className="section"><div className="stayGrid">{stays.map(s=><article className="stayCard" key={s.id||s.name}><img src={s.img}/><div><div className="rating"><Star fill="currentColor" size={14}/> {s.rating||4.8}</div><h3>{s.name}</h3><p><MapPin size={14}/> {s.location}</p><strong>{s.price}</strong></div></article>)}</div></section></main>}
 
-function ReelsPage({liked,setLiked}){return <main className="page"><div className="pageHero"><small>GHATVERSE REELS</small><h1>See the Ghats through real stories.</h1><p>Short videos from travellers, locals and curated creators.</p></div><section className="section"><div className="reelGrid">{reels.map(r=><article className="reelCard" key={r.place}><img src={r.img}/><div className="reelShade"/><div className="reelText"><span>@ghatverse · {r.state}</span><h3>{r.place}</h3><p>Hidden gems of the Western Ghats</p><div><button onClick={()=>setLiked(l=>l.includes(r.place)?l.filter(x=>x!==r.place):[...l,r.place])}><Heart fill={liked.includes(r.place)?"currentColor":"none"}/>{r.likes}</button><button><PlayCircle/> Watch</button></div></div></article>)}</div></section></main>}
+function ReelsPage({items,liked,setLiked}){const feed=items||[];return <main className="page"><div className="pageHero"><small>GHATVERSE REELS</small><h1>See the Ghats through real stories.</h1><p>Short videos from travellers, locals and curated creators.</p></div><section className="section"><div className="reelGrid">{feed.map(r=><article className="reelCard" key={r.place}><img src={r.img}/><div className="reelShade"/><div className="reelText"><span>@ghatverse · {r.state}</span><h3>{r.place}</h3><p>Hidden gems of the Western Ghats</p><div><button onClick={()=>setLiked(l=>l.includes(r.place)?l.filter(x=>x!==r.place):[...l,r.place])}><Heart fill={liked.includes(r.place)?"currentColor":"none"}/>{r.likes}</button><button><PlayCircle/> Watch</button></div></div></article>)}</div></section></main>}
 
 function Planner(){const[step,setStep]=useState(1);return <main className="planner"><div className="plannerBox"><div className="plannerIntro"><Leaf/><small>GHATVERSE TRIP PLANNER</small><h1>Let’s plan your<br/><em>perfect trip.</em></h1><p>Tell us what you want. We'll shape a Western Ghats experience around you.</p><div className="steps">{[1,2,3].map(n=><span className={step>=n?"done":""} key={n}>{n}</span>)}</div></div><div className="plannerForm">{step===1&&<><h2>Where do you want to go?</h2><div className="optionGrid">{["Karnataka","Kerala","Maharashtra","Tamil Nadu","Goa","Gujarat"].map(x=><button onClick={()=>setStep(2)} key={x}><MapPin/> {x}</button>)}</div></>}{step===2&&<><h2>How long is your trip?</h2><div className="optionGrid">{["1 Day","2D / 1N","3D / 2N","4D / 3N","5D+"].map(x=><button onClick={()=>setStep(3)} key={x}><CalendarDays/> {x}</button>)}</div></>}{step===3&&<><h2>What kind of traveller are you?</h2><div className="optionGrid">{["Solo","Couple","Friends","Family"].map(x=><button onClick={()=>setStep(1)} key={x}><Users/> {x}</button>)}</div><div className="success"><Leaf/> Your GHATVERSE itinerary is ready to personalise.</div></>}</div></div></main>}
 
